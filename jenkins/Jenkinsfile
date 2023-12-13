@@ -1,0 +1,54 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_DEFAULT_REGION = 'us-east-1'  
+        ECR_REGISTRY = '656967617759.dkr.ecr.us-east-1.amazonaws.com/eks-lab'
+        LAB_REGISTRY = 'https://656967617759.dkr.ecr.us-east-1.amazonaws.com'  
+        REGISTRY_CREDENTIALS = 'ecr:us-east-1:awscreds'
+        HELLO_IMAGE_NAME = "${ECR_REGISTRY}"
+        HAPPY_IMAGE_NAME = "${ECR_REGISTRY}"
+        HELLO_TAG = "hello-world-app"
+        HAPPY_TAG = "happy-world-app"
+    }
+
+    stages {
+        stage('Fetch code') {
+            steps {
+                script {
+                    git branch: 'main', url: 'https://github.com/YU88John/eks-gitops-code-repo.git'
+                }
+            }
+        }
+
+        stage('Build and Push Hello Image') {
+            steps {
+                script {
+                    // Build the hello_world_service Docker image
+                    def dockerImageHello = docker.build(HELLO_IMAGE_NAME, "./hello_world_service/")
+
+                    // Push the built images to ECR
+                    docker.withRegistry(LAB_REGISTRY, REGISTRY_CREDENTIALS) {
+                        dockerImageHello.push("${HELLO_TAG}-${env.BUILD_NUMBER}")
+                    }
+                }
+            }
+        }
+
+        stage('Build and Push Happy Image') {
+            steps {
+                script {
+                    // Build the happy_world_service Docker image
+                    def dockerImageHappy = docker.build(HAPPY_IMAGE_NAME, "./happy_world_service/")
+
+                    // Push the built images to ECR
+                    docker.withRegistry(LAB_REGISTRY, REGISTRY_CREDENTIALS) {
+                        dockerImageHappy.push("${HAPPY_TAG}-${env.BUILD_NUMBER}")
+                    }
+                }
+            }
+        }
+    }
+}
+
+
