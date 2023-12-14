@@ -5,7 +5,7 @@ repositoryName="k8s-gitops-manifests-repo"
 baseBranch="main"  
 headBranch="dev"  
 pullRequestTitle="Updated image version - Build #${BUILD_NUMBER}"
-pullRequestBody="Please pull these awesome changes in!"
+pullRequestBody="Please pull these awesome changes in! Check it out!"
 
 apiUrl="https://api.github.com/repos/${repositoryOwner}/${repositoryName}/pulls"
 payload="{
