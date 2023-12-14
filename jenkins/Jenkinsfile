@@ -58,7 +58,7 @@ pipeline {
                     echo 'Clearing the workspace'
                     sh 'rm -rf k8s-gitops-manifests-repo'
                     echo 'Cloning the repo...'
-                    sh 'git clone -b main https://github.com/YU88John/k8s-gitops-manifests-repo.git'
+                    sh 'git clone -b dev https://github.com/YU88John/k8s-gitops-manifests-repo.git'
                 }
             }
         }
@@ -94,7 +94,7 @@ pipeline {
                             sh "git config --global user.email 'mtk.john88@gmail.com'"
                             sh "git remote set-url origin https://${GITHUB_TOKEN}@github.com/YU88John/k8s-gitops-manifests-repo.git"
                             sh "git commit -m \"Updated image version - Build #${env.BUILD_NUMBER}\""
-                            sh 'git push origin dev --force'
+                            sh 'git push -u origin dev --force'
                         }
                     }
                 }
