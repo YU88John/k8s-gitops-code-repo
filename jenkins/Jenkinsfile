@@ -66,6 +66,7 @@ pipeline {
                         git branch: 'dev',
                         url: "https://${GITHUB_TOKEN}@github.com/YU88John/k8s-gitops-manifests-repo.git"
                     }
+                    sh 'ls -la k8s-gitops-manifests-repo'
                 }
             }
         }
