@@ -58,7 +58,9 @@ pipeline {
                     echo 'Clearing the workspace'
                     sh 'rm -rf k8s-gitops-manifests-repo'
                     echo 'Cloning the repo...'
-                    sh 'git clone -b dev https://github.com/YU88John/k8s-gitops-manifests-repo.git'
+                    git branch: 'dev',
+                    credentialsId: 'GITHUB_TOKEN_ID',
+                    url: "https://github.com/YU88John/k8s-gitops-manifests-repo.git"
                 }
             }
         }
