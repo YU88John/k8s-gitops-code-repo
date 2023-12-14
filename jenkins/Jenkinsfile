@@ -63,17 +63,17 @@ pipeline {
                     sh 'rm -rf k8s-gitops-manifests-repo'
                     echo 'Cloning the repo...'
                     withCredentials([string(credentialsId: 'GITHUB_TOKEN_ID', variable: 'GITHUB_TOKEN')]) {
-                        git branch: 'dev',
-                        url: "https://${GITHUB_TOKEN}@github.com/YU88John/k8s-gitops-manifests-repo.git"
+                        sh "git clone https://${GITHUB_TOKEN}@github.com/YU88John/k8s-gitops-manifests-repo.git"
+                        sh 'git checkout dev'
                     }
-                    sh 'ls -ltr manifests'
+                    sh 'ls -ltr'
                 }
             }
         }
 
         stage('Update manifests') {
             steps {
-                dir("manifests") {
+                dir("k8s-gitops-manifests-repo") {
                     script {
                         // Define the new image names with tags
                         def newHelloImage = "${DOCKER_HUB_USERNAME}/hello-world-app:${env.BUILD_NUMBER}"
