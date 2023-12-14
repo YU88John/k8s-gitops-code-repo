@@ -9,6 +9,10 @@ pipeline {
         DOCKER_HUB_CREDENTIALS_ID = 'kubeje2-docker-login'
     }
 
+    tools {
+        git 'Default'
+    }
+
     stages {
         stage('Fetch code') {
             steps {
