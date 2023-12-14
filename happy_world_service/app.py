@@ -5,7 +5,7 @@ app_happy = Flask(__name__)
 
 @app_happy.route('/')
 def happy():
-    return 'Happy World! This is the Happy microservice.'
+    return 'Happy World! This is the Happy microservice. Check my fully dev-prod env.'
 
 # endpoint for fetching Hello World json
 @app_happy.route('/api/hello', methods=['GET'])
