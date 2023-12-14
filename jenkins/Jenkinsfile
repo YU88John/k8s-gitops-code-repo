@@ -72,12 +72,12 @@ pipeline {
                         def newHappyImage = "${DOCKER_HUB_USERNAME}/happy-world-app:${env.BUILD_NUMBER}"
 
                         // Update the image names in the deployment files
-                        sh "sed -i 's|image:.*hello-world-app.*|image: ${newHelloImage}|' deployment_hello.yaml"
-                        sh "sed -i 's|image:.*happy-world-app.*|image: ${newHappyImage}|' deployment_happy.yaml"
+                        sh "sed -i 's|image:.*hello-world-app.*|image: ${newHelloImage}|' manifests/deployment_hello.yaml"
+                        sh "sed -i 's|image:.*happy-world-app.*|image: ${newHappyImage}|' manifests/deployment_happy.yaml"
 
                         // Debugging output
-                        sh 'cat deployment_hello.yaml'
-                        sh 'cat deployment_happy.yaml'
+                        sh 'cat manifests/deployment_hello.yaml'
+                        sh 'cat manifests/deployment_happy.yaml'
                     }
                 }
             }
