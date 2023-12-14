@@ -110,7 +110,7 @@ pipeline {
                         def baseBranch = 'main'
                         def headBranch = 'dev'
                         def pullRequestTitle = "Updated image version - Build #${env.BUILD_NUMBER}"
-                        def pullRequestBody = "Please pull these awesome changes in! Check it out!"
+                        def pullRequestBody = "Please pull these awesome changes in! Check it out! Merge em to main"
 
                         def apiUrl = "https://api.github.com/repos/${repositoryOwner}/${repositoryName}/pulls"
                         def payload = """{
