@@ -16,7 +16,7 @@ pipeline {
         stage('Fetch code') {
             steps {
                 script {
-                    git branch: 'main', url: 'https://github.com/YU88John/eks-gitops-code-repo.git'
+                    git branch: 'main', url: 'https://github.com/YU88John/k8s-gitops-code-repo.git'
                 }
             }
         }
@@ -48,7 +48,73 @@ pipeline {
                 }
             }
         }
+
+        stage('Clone or pull the manifests repo') {
+            steps {
+                script {
+                    if (fileExists('k8s-gitops-manifests-repo')) {
+                        echo 'The repository already exists. Now, pulling latest updates'
+
+                        dir("k8s-gitops-manifests-repo") {
+                            sh 'git pull'
+                        }
+                    }
+                    else {
+                        echo 'The repository is not here. Cloning the repo...'
+                        sh 'git clone -b main https://github.com/YU88John/k8s-gitops-manifests-repo.git'
+                }
+            }
+        }
+        }
+
+        stage('Update hello manifests') {
+            steps {
+                dir("k8s-gitops-manifests-repo") {
+                    script {
+                        // Define the new image names with tags
+                        def newHelloImage = "${ECR_REGISTRY}:${HELLO_TAG}-${env.BUILD_NUMBER}"
+
+                        // Update the image name in the deployment_hello.yaml file
+                        sh "sed -i 's|public.ecr.aws/h4k8u6r3/eks-lab:hello-world-app|${newHelloImage}|' deployment_hello.yaml"
+                    }
+                }
+            }
+        }
+
+
+        stage('Update happy manifests') {
+            steps {
+                dir("k8s-gitops-manifests-repo") {
+                    script {
+                        // Define the new image names with tags
+                        def newHappyImage = "${ECR_REGISTRY}:${HAPPY_TAG}-${env.BUILD_NUMBER}"
+
+                        // Update the image name in the deployment_happy.yaml file
+                        sh "sed -i 's|public.ecr.aws/h4k8u6r3/eks-lab:happy-world-app|${newHappyImage}|' deployment_happy.yaml"
+                    }
+                }
+            }
+        }
+
+        stage('Commit and push') {
+        steps {
+            dir("k8s-gitops-manifests-repo") {
+                script {
+                    withCredentials([string(credentialsId: 'GITHUB_TOKEN_ID', variable: 'GITHUB_TOKEN')]) {
+                        sh "git config --global user.email 'mtk.john88@gmail.com'"
+                        sh "git remote set-url origin https://${GITHUB_TOKEN}@github.com/YU88John/k8s-gitops-manifests-repo.git"
+                        sh 'git add -A'
+                        sh "git commit -m \"Updated image version - Build #${env.BUILD_NUMBER}\""
+                        sh 'git push origin main'
+                    }
+                }
+            }
+        }
+    }
+
+
     }
 }
+
 
 

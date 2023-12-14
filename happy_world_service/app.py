@@ -14,7 +14,7 @@ def get_happy():
     hello_response = requests.get('http://hello-world-service/api/hello')
     hello_message = hello_response.json().get('message', 'Error getting hello message')
 
-    return jsonify(message=f"{hello_message} And Happy from the Happy microservice!")
+    return jsonify(message=f"{hello_message} And Happy from the Happy microservice! Edition 2.0")
 
 if __name__ == '__main__':
     app_happy.run(debug=True, host='0.0.0.0', port=5001)
