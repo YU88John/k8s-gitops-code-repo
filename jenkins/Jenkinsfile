@@ -2,14 +2,11 @@ pipeline {
     agent any
 
     environment {
-        AWS_DEFAULT_REGION = 'us-east-1'  
-        ECR_REGISTRY = '656967617759.dkr.ecr.us-east-1.amazonaws.com/eks-lab'
-        LAB_REGISTRY = 'https://656967617759.dkr.ecr.us-east-1.amazonaws.com'  
-        REGISTRY_CREDENTIALS = 'ecr:us-east-1:awscreds'
-        HELLO_IMAGE_NAME = "${ECR_REGISTRY}"
-        HAPPY_IMAGE_NAME = "${ECR_REGISTRY}"
-        HELLO_TAG = "hello-world-app"
-        HAPPY_TAG = "happy-world-app"
+        DOCKER_HUB_USERNAME = 'kubeje2'
+        DOCKER_HUB_REGISTRY = 'docker.io'
+        HELLO_IMAGE_NAME = "${DOCKER_HUB_USERNAME}/hello-world-app:${env.BUILD_NUMBER}"
+        HAPPY_IMAGE_NAME = "${DOCKER_HUB_USERNAME}/happy-world-app:${env.BUILD_NUMBER}"
+        DOCKER_HUB_CREDENTIALS_ID = 'kubeje2-docker-login'
     }
 
     stages {
@@ -21,16 +18,24 @@ pipeline {
             }
         }
 
+        stage('Log in to Docker Hub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: DOCKER_HUB_CREDENTIALS_ID, usernameVariable: 'DOCKER_HUB_USERNAME', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
+                        sh "echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin $DOCKER_HUB_REGISTRY"
+                    }
+                }
+            }
+        }
+
         stage('Build and Push Hello Image') {
             steps {
                 script {
                     // Build the hello_world_service Docker image
                     def dockerImageHello = docker.build(HELLO_IMAGE_NAME, "./hello_world_service/")
 
-                    // Push the built images to ECR
-                    docker.withRegistry(LAB_REGISTRY, REGISTRY_CREDENTIALS) {
-                        dockerImageHello.push("${HELLO_TAG}-${env.BUILD_NUMBER}")
-                    }
+                    // Push the built images to Docker Hub
+                    dockerImageHello.push()
                 }
             }
         }
@@ -41,10 +46,8 @@ pipeline {
                     // Build the happy_world_service Docker image
                     def dockerImageHappy = docker.build(HAPPY_IMAGE_NAME, "./happy_world_service/")
 
-                    // Push the built images to ECR
-                    docker.withRegistry(LAB_REGISTRY, REGISTRY_CREDENTIALS) {
-                        dockerImageHappy.push("${HAPPY_TAG}-${env.BUILD_NUMBER}")
-                    }
+                    // Push the built images to Docker Hub
+                    dockerImageHappy.push()
                 }
             }
         }
@@ -52,69 +55,50 @@ pipeline {
         stage('Clone or pull the manifests repo') {
             steps {
                 script {
-                    if (fileExists('k8s-gitops-manifests-repo')) {
-                        echo 'The repository already exists. Now, pulling latest updates'
-
-                        dir("k8s-gitops-manifests-repo") {
-                            sh 'git pull'
-                        }
-                    }
-                    else {
-                        echo 'The repository is not here. Cloning the repo...'
-                        sh 'git clone -b main https://github.com/YU88John/k8s-gitops-manifests-repo.git'
-                }
-            }
-        }
-        }
-
-        stage('Update hello manifests') {
-            steps {
-                dir("k8s-gitops-manifests-repo") {
-                    script {
-                        // Define the new image names with tags
-                        def newHelloImage = "${ECR_REGISTRY}:${HELLO_TAG}-${env.BUILD_NUMBER}"
-
-                        // Update the image name in the deployment_hello.yaml file
-                        sh "sed -i 's|public.ecr.aws/h4k8u6r3/eks-lab:hello-world-app|${newHelloImage}|' deployment_hello.yaml"
-                    }
+                    echo 'Clearing the workspace'
+                    sh 'rm -rf k8s-gitops-manifests-repo'
+                    echo 'Cloning the repo...'
+                    sh 'git clone -b main https://github.com/YU88John/k8s-gitops-manifests-repo.git'
                 }
             }
         }
 
-
-        stage('Update happy manifests') {
+        stage('Update manifests') {
             steps {
                 dir("k8s-gitops-manifests-repo") {
                     script {
                         // Define the new image names with tags
-                        def newHappyImage = "${ECR_REGISTRY}:${HAPPY_TAG}-${env.BUILD_NUMBER}"
+                        def newHelloImage = "${DOCKER_HUB_USERNAME}/hello-world-app:${env.BUILD_NUMBER}"
+                        def newHappyImage = "${DOCKER_HUB_USERNAME}/happy-world-app:${env.BUILD_NUMBER}"
 
-                        // Update the image name in the deployment_happy.yaml file
-                        sh "sed -i 's|public.ecr.aws/h4k8u6r3/eks-lab:happy-world-app|${newHappyImage}|' deployment_happy.yaml"
+                        // Update the image names in the deployment files
+                        sh "sed -i 's|image:.*hello-world-app.*|image: ${newHelloImage}|' deployment_hello.yaml"
+                        sh "sed -i 's|image:.*happy-world-app.*|image: ${newHappyImage}|' deployment_happy.yaml"
+
+                        // Debugging output
+                        sh 'cat deployment_hello.yaml'
+                        sh 'cat deployment_happy.yaml'
                     }
                 }
             }
         }
 
         stage('Commit and push') {
-        steps {
-            dir("k8s-gitops-manifests-repo") {
-                script {
-                    withCredentials([string(credentialsId: 'GITHUB_TOKEN_ID', variable: 'GITHUB_TOKEN')]) {
-                        sh "git config --global user.email 'mtk.john88@gmail.com'"
-                        sh "git remote set-url origin https://${GITHUB_TOKEN}@github.com/YU88John/k8s-gitops-manifests-repo.git"
-                        sh 'git add -A'
-                        sh "git commit -m \"Updated image version - Build #${env.BUILD_NUMBER}\""
-                        sh 'git push origin main'
+            steps {
+                dir("k8s-gitops-manifests-repo") {
+                    script {
+                        sleep 5
+                        sh 'git add .'
+                        sh 'git diff'
+                        withCredentials([string(credentialsId: 'GITHUB_TOKEN_ID', variable: 'GITHUB_TOKEN')]) {
+                            sh "git config --global user.email 'mtk.john88@gmail.com'"
+                            sh "git remote set-url origin https://${GITHUB_TOKEN}@github.com/YU88John/k8s-gitops-manifests-repo.git"
+                            sh "git commit -m \"Updated image version - Build #${env.BUILD_NUMBER}\""
+                            sh 'git push origin main --force'
+                        }
                     }
                 }
             }
         }
     }
-
-
-    }
 }
-
-
-
