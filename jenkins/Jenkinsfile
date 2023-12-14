@@ -101,12 +101,33 @@ pipeline {
             }
         }
 
-        stage('Create a pull request') {
+       stage('Create a pull request') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'GITHUB_TOKEN_ID', variable: 'GITHUB_TOKEN')]) {
-                        sh './pull-request.sh'
-                    }
+                    def repositoryOwner = 'YU88John'
+                    def repositoryName = 'k8s-gitops-manifests-repo'
+                    def baseBranch = 'main'
+                    def headBranch = 'dev'
+                    def pullRequestTitle = "Updated image version - Build #${env.BUILD_NUMBER}"
+                    def pullRequestBody = "Please pull these awesome changes in! Check it out!"
+
+                    def apiUrl = "https://api.github.com/repos/${repositoryOwner}/${repositoryName}/pulls"
+                    def payload = """{
+                        "title": "${pullRequestTitle}",
+                        "body": "${pullRequestBody}",
+                        "head": "${repositoryOwner}:${headBranch}",
+                        "base": "${baseBranch}"
+                    }"""
+
+                    sh """
+                        curl -L \
+                        -X POST \
+                        -H 'Accept: application/vnd.github+json' \
+                        -H 'Authorization: Bearer ${GITHUB_TOKEN}' \
+                        -H 'X-GitHub-Api-Version: 2022-11-28' \
+                        ${apiUrl} \
+                        -d '${payload}'
+                    """
                 }
             }
         }
