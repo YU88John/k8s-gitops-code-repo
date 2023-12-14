@@ -78,6 +78,8 @@ pipeline {
                         def newHelloImage = "${DOCKER_HUB_USERNAME}/hello-world-app:${env.BUILD_NUMBER}"
                         def newHappyImage = "${DOCKER_HUB_USERNAME}/happy-world-app:${env.BUILD_NUMBER}"
 
+                        sh "pwd"
+                        sh "ls -la"
                         // Update the image names in the deployment files
                         sh "sed -i 's|image:.*hello-world-app.*|image: ${newHelloImage}|' manifests/deployment_hello.yaml"
                         sh "sed -i 's|image:.*happy-world-app.*|image: ${newHappyImage}|' manifests/deployment_happy.yaml"
