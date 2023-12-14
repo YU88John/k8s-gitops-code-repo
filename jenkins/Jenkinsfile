@@ -66,14 +66,14 @@ pipeline {
                         git branch: 'dev',
                         url: "https://${GITHUB_TOKEN}@github.com/YU88John/k8s-gitops-manifests-repo.git"
                     }
-                    sh 'ls -ltr'
+                    sh 'ls -ltr manifests'
                 }
             }
         }
 
         stage('Update manifests') {
             steps {
-                dir("k8s-gitops-manifests-repo") {
+                dir("manifests") {
                     script {
                         // Define the new image names with tags
                         def newHelloImage = "${DOCKER_HUB_USERNAME}/hello-world-app:${env.BUILD_NUMBER}"
