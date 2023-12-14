@@ -94,11 +94,22 @@ pipeline {
                             sh "git config --global user.email 'mtk.john88@gmail.com'"
                             sh "git remote set-url origin https://${GITHUB_TOKEN}@github.com/YU88John/k8s-gitops-manifests-repo.git"
                             sh "git commit -m \"Updated image version - Build #${env.BUILD_NUMBER}\""
-                            sh 'git push origin main --force'
+                            sh 'git push origin dev --force'
                         }
                     }
                 }
             }
         }
+
+        stage('Create a pull request') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'GITHUB_TOKEN_ID', variable: 'GITHUB_TOKEN')]) {
+                        sh './create_pull_request.sh'
+                    }
+                }
+            }
+        }
+
     }
 }
