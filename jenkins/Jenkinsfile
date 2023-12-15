@@ -117,6 +117,8 @@ pipeline {
 
         stage('Commit and push') {
             steps {
+                dir("k8s-gitops-manifests-repo") {
+
                     script {
                         sleep 5
                         sh 'git add -A'
@@ -137,6 +139,7 @@ pipeline {
                     }
                 }
             }
+        }
         
 
        stage('Create a pull request') {
