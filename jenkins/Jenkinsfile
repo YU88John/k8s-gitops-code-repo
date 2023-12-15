@@ -63,7 +63,6 @@ pipeline {
                     // We need personal access token for private repos
                     withCredentials([string(credentialsId: 'GITHUB_TOKEN_ID', variable: 'GITHUB_TOKEN')]) {
                         sh "git clone https://${GITHUB_TOKEN}@github.com/YU88John/k8s-gitops-manifests-repo.git"
-                        sh 'cd k8s-gitops-manifests-repo'
                         sh 'git checkout -B dev origin/dev'
                     }
                 }
