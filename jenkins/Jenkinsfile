@@ -61,7 +61,7 @@ pipeline {
                 script {
                     echo 'Clearing the workspace'
                     sh 'rm -rf k8s-gitops-manifests-repo'
-                    sh 'rm -f *'
+                    sh 'rm -rf *'
                     sh 'ls -ltr'
                     echo 'Cloning the repo...'
                     withCredentials([string(credentialsId: 'GITHUB_TOKEN_ID', variable: 'GITHUB_TOKEN')]) {
