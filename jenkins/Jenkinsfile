@@ -17,6 +17,7 @@ pipeline {
         stage('Fetch code') {
             steps {
                 script {
+                    deleteDir()
                     git branch: 'main', url: 'https://github.com/YU88John/k8s-gitops-code-repo.git'
                 }
             }
@@ -69,7 +70,8 @@ pipeline {
                         sh 'ls -ltr'
                         sh 'git branch'
                         sh 'git branch -a'
-                        sh 'git checkout dev'
+                        sh 'git checkout -b dev origin/dev'
+                        sh 'git branch -a'
                     }
                     sh 'ls -ltr'
                 }
