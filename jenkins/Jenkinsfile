@@ -123,7 +123,8 @@ pipeline {
                         sh 'git diff'
 
                         sh 'git branch dev origin/dev || true'
-                        sh 'git checkout dev'
+                        sh 'git checkout origin/dev'
+                        sh 'git checkout -b dev'
                         withCredentials([string(credentialsId: 'GITHUB_TOKEN_ID', variable: 'GITHUB_TOKEN')]) {
                             sh "git config --global user.email 'mtk.john88@gmail.com'"
                             sh "git remote set-url origin https://${GITHUB_TOKEN}@github.com/YU88John/k8s-gitops-manifests-repo.git"
