@@ -131,6 +131,7 @@ pipeline {
                             sh 'git push -u origin dev --force'
                         }
                     }
+                    }
                 }
             }
         }
