@@ -64,6 +64,7 @@ pipeline {
                     echo 'Cloning the repo...'
                     withCredentials([string(credentialsId: 'GITHUB_TOKEN_ID', variable: 'GITHUB_TOKEN')]) {
                         sh "git clone https://${GITHUB_TOKEN}@github.com/YU88John/k8s-gitops-manifests-repo.git"
+                        sh 'ls -ltr'
                         sh 'git checkout dev'
                     }
                     sh 'ls -ltr'
