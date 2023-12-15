@@ -68,6 +68,7 @@ pipeline {
                         sh "git clone https://${GITHUB_TOKEN}@github.com/YU88John/k8s-gitops-manifests-repo.git"
                         sh 'ls -ltr'
                         sh 'cd k8s-gitops-manifests-repo'
+                        sh 'pwd'
                         sh 'git fetch origin'
                         sh 'ls -ltr'
                         sh 'git branch'
