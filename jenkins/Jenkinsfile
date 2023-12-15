@@ -81,12 +81,15 @@ pipeline {
 
         stage('Create local branch and checkout') {
             steps {
-                script {
-                    sh 'git checkout origin/dev'
+                dir('k8s-gitops-manifests-repo') {
+                    script {
+                        sh 'pwd'
+                        sh 'git branch -a'
+                        sh 'git checkout origin/dev'
                     // Create a new local branch 'dev' based on the remote tracking branch
-                    sh 'git checkout -b dev'
+                        sh 'git checkout -b dev'
+                    }
                 }
-            }
         }
 
         stage('Update manifests') {
