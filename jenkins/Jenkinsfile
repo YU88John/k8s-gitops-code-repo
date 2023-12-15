@@ -90,6 +90,7 @@ pipeline {
                         sh 'git checkout -b dev'
                     }
                 }
+            }
         }
 
         stage('Update manifests') {
@@ -116,7 +117,6 @@ pipeline {
 
         stage('Commit and push') {
             steps {
-                dir("k8s-gitops-manifests-repo") {
                     script {
                         sleep 5
                         sh 'git add .'
@@ -130,11 +130,11 @@ pipeline {
                             sh "git commit -m \"Updated image version - Build #${env.BUILD_NUMBER}\""
                             sh 'git push -u origin dev --force'
                         }
-                    }
+                    
                     }
                 }
             }
-        }
+        
 
        stage('Create a pull request') {
             steps {
