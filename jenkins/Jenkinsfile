@@ -9,10 +9,6 @@ pipeline {
         DOCKER_HUB_CREDENTIALS_ID = 'kubeje2-docker-login'
     }
 
-    tools {
-        git 'Default'
-    }
-
     stages {
         stage('Fetch code') {
             steps {
@@ -56,17 +52,19 @@ pipeline {
             }
         }
 
-        stage('Clone or pull the manifests repo') {
+        stage('Clone the manifests repo') {
             steps {
                 script {
                     echo 'Clearing the workspace'
+                    // Remove the previous cloned directory to avoid conflicts 
                     sh 'rm -rf k8s-gitops-manifests-repo'
                     echo 'Cloning the repo...'
+
+                    // We need personal access token for private repos
                     withCredentials([string(credentialsId: 'GITHUB_TOKEN_ID', variable: 'GITHUB_TOKEN')]) {
                         sh "git clone https://${GITHUB_TOKEN}@github.com/YU88John/k8s-gitops-manifests-repo.git"
                         sh 'git checkout dev'
                     }
-                    sh 'ls -ltr'
                 }
             }
         }
@@ -78,16 +76,10 @@ pipeline {
                         // Define the new image names with tags
                         def newHelloImage = "${DOCKER_HUB_USERNAME}/hello-world-app:${env.BUILD_NUMBER}"
                         def newHappyImage = "${DOCKER_HUB_USERNAME}/happy-world-app:${env.BUILD_NUMBER}"
-
-                        sh "pwd"
-                        sh "ls -la"
+                      
                         // Update the image names in the deployment files
                         sh "sed -i 's|image:.*hello-world-app.*|image: ${newHelloImage}|' manifests/deployment_hello.yaml"
                         sh "sed -i 's|image:.*happy-world-app.*|image: ${newHappyImage}|' manifests/deployment_happy.yaml"
-
-                        // Debugging output
-                        sh 'cat manifests/deployment_hello.yaml'
-                        sh 'cat manifests/deployment_happy.yaml'
                     }
                 }
             }
@@ -100,9 +92,9 @@ pipeline {
                         sleep 5
                         sh 'git add .'
                         sh 'git diff'
-
                         sh 'git branch dev origin/dev || true'
                         sh 'git checkout dev'
+
                         withCredentials([string(credentialsId: 'GITHUB_TOKEN_ID', variable: 'GITHUB_TOKEN')]) {
                             sh "git config --global user.email 'mtk.john88@gmail.com'"
                             sh "git remote set-url origin https://${GITHUB_TOKEN}@github.com/YU88John/k8s-gitops-manifests-repo.git"
@@ -117,6 +109,7 @@ pipeline {
        stage('Create a pull request') {
             steps {
                 script {
+                    // This will create a pull request to the main branch
                     withCredentials([string(credentialsId: 'GITHUB_TOKEN_ID', variable: 'GITHUB_TOKEN')]) {
                         def repositoryOwner = 'YU88John'
                         def repositoryName = 'k8s-gitops-manifests-repo'
