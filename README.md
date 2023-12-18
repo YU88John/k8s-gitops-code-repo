@@ -41,5 +41,9 @@ This is an experimental project built as an active-recall for my learning on mic
 - Grafana
 - Kiali
 
+You can find the Kubernetes manifests and Istio configurations at <a href="https://github.com/YU88John/k8s-gitops-manifests-repo">this repository</a>.
+
+<br>
+
 > DISCLAIMER: 
 > Some parts of the project maybe misinterpreted. Any contribution is welcomed.
