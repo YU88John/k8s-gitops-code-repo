@@ -4,7 +4,7 @@ app_hello = Flask(__name__)
 
 @app_hello.route('/')
 def hello():
-    return 'Hello, World! This is the Hello microservice. This is the final version for CI/CD and GitOps!'
+    return 'Hello, World! This is the Hello microservice. This is the final version for CI/CD and GitOps! We love DevOps!'
 
 # endpoint for api communication
 @app_hello.route('/api/hello', methods=['GET'])
